@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+
+<body>
+  <h1>Bieżące taski</h1>
+
+  <h2>Taski - utworzone przeze mnie</h2>
+  <div id="tasks"></div>
+
+  <h2>Taski - przypisane do mnie</h2>
+  <div id="assignedTasks"></div>
+
+
+  <script>
+
+    // console.log('fetch', window.fetch)
+
+    // ### Getting data from server using fetch ###
+    // const getAllUsers = () => fetch('https://tasks.isa.valuepoint.pl/users')
+    //   .then(response => response.json())
+    //   .then(data => console.log('data', data))
+
+    // getAllUsers()
+
+    // const getAllTasks = () => fetch('https://tasks.isa.valuepoint.pl/tasks')
+    //   .then(response => response.json())
+    //   .then(data => console.log('data', data))
+
+    // getAllTasks()
+
+    // const My_id = '5aeffed76f78ba537f03ade4'
+
+    // const getMyUser = (id) => fetch('https://tasks.isa.valuepoint.pl/users/' + id)
+    //     .then(response => response.json())
+    //     .then(data => console.log('data', data))
+
+    // getMyUser(My_id)
+
+    // const addTaskToUser = (creator, title) => {
+    //   const url = "https://tasks.isa.valuepoint.pl/tasks/add"
+
+    //   const task = {
+    //     creator: creator,
+    //     title: title
+    //   }
+
+    //   const fetchConfig = {
+    //     method: "PUT",
+    //     body: JSON.stringify(task),
+    //     headers: {
+    //       "Content-type": "application/json"
+    //     }
+    //   }
+
+    //   return fetch(url, fetchConfig)
+    //     .then(response => response.json())
+    //     .then(data => console.log('Task', data))
+    // }
+
+    // addTaskToUser('bartek0402@gmail.com', 'Sprawdzić przesyłanie informacji do serwera za pomocą fetch')
+
+    const getTasksCreatedBy = (creator) => {
+      const url = `http://tasks.isa.valuepoint.pl/tasks/search/creator/${creator}`
+
+      const tasks = fetch(url)
+        .then(r => r.json())
+        .then(tasks => {
+
+          const html = `<ul>
+            ${tasks.data.map((task) => {
+              return `<li>
+                <strong>Tutuł: ${task.title}</strong>
+                <br/>
+                - Od: ${task.creator}<br/>
+                - Dla: ${task.assignee}<br/>
+                <button onClick="window.assignTo('${task._id}')">Przypisz do</button>
+                <button onClick="window.deleteTask('${task._id}')">Usuń</button>
+              </li>`
+            }).join('')}
+          </ul>`
+
+          document.getElementById('tasks').innerHTML = html
+
+        })
+    }
+
+    getTasksCreatedBy('bartek0402@gmail.com')
+
+    const getTasksAssignedTo = (assignee) => {
+      const url = `http://tasks.isa.valuepoint.pl/tasks/search/assignee/${assignee}`
+
+      const tasks = fetch(url)
+        .then(r => r.json())
+        .then(tasks => {
+
+          const html = `<ul>
+            ${tasks.data.map((task) => {
+              return `<li>
+                <strong>Tutuł: ${task.title}</strong>
+                <br/>
+                - Od: ${task.creator}<br/>
+                - Dla: ${task.assignee}<br/>
+                <button onClick="window.assignTo('${task._id}')">Przypisz do</button>
+                <button onClick="window.deleteTask('${task._id}')">Usuń</button>
+              </li>`
+            }).join('')}
+          </ul>`
+
+          document.getElementById('assignedTasks').innerHTML = html
+
+        })
+    }
+
+    getTasksAssignedTo('Bartek')
+
+    window.assignTo = (id) => {
+      const assignee = prompt('Podaj do kogo przypisujesz taska:')
+
+      const url = `http://tasks.isa.valuepoint.pl/tasks/${id}/assing-to/${assignee}`
+
+      if (assignee.length) {
+        fetch(url)
+          .then(r => r.json())
+          .then(data => {
+            console.log('Assigned successfully', data)
+            alert('Assigned successfully')
+          })
+      }
+    }
+
+    window.deleteTask = (id) => {
+      const url = `http://tasks.isa.valuepoint.pl/tasks/${id}`
+
+      const fetchConfig = {
+        method: "DELETE",
+        body: {},
+        headers: {
+          "Content-type": "application/json"
+        }
+      }
+
+      return fetch(url, fetchConfig)
+        .then(r => r.json())
+        .then(data => {
+          console.log('Deleted successfully', data)
+          alert('Deleted successfully')
+        })
+    }
+
+    setInterval(
+      () => {
+        getTasksCreatedBy('bartek0402@gmail.com'),
+        getTasksAssignedTo('Bartek'),
+        console.log('Tasks updated')
+      },
+      3000
+    )
+
+  </script>
+</body>
+
+</html>
